@@ -28,14 +28,37 @@ namespace ServiceCenterProvider.Screens
                 }
 
                 Console.WriteLine("Создание / Редактирование заявки");
-                Console.Write("Номер заявки: №");
-                int RequestNumber = Convert.ToInt32(Console.ReadLine()); // TODO: Ошибка преобразования / переполнения
+
+                int RequestNumber;
+                while (true)
+                {
+                    Console.Write("Номер заявки: №");
+                    try
+                    {
+                        RequestNumber = Convert.ToInt32(Console.ReadLine());
+                        if (RequestNumber <= 0)
+                        {
+                            throw new Exception();
+                        }
+                        break;
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("Вы ввели неверное значение");
+                        Console.WriteLine();
+                    }
+                }
                 Console.Clear();
 
                 Entities.Request Request = this.Container.RequestRepository.Find(RequestNumber);
                 if (Request == null)
                 {
-                    this.CreateNew(RequestNumber);
+                    Entities.Request _Request = this.CreateNew(RequestNumber);
+                    if (_Request.Products.Count() == 0)
+                    {
+                        this.Container.RequestRepository.Items.Remove(_Request);
+                    }
                 } else
                 {
                     this.Update(Request);
@@ -47,11 +70,13 @@ namespace ServiceCenterProvider.Screens
             Console.Clear();
         }
 
-        private void CreateNew(int RequestNumber)
+        private Entities.Request CreateNew(int RequestNumber)
         {
             Entities.Request Request = this.Container.RequestRepository.New(RequestNumber);
 
             this.AskForProducts(Request);
+
+            return Request;
         }
 
         public void AskForProducts(Entities.Request Request)
@@ -82,8 +107,27 @@ namespace ServiceCenterProvider.Screens
                     }
                     else
                     {
-                        Console.Write("Количество: ");
-                        int Amount = Convert.ToInt32(Console.ReadLine()); // TODO: Ошибка преобразования / переполнения
+
+                        int Amount;
+                        while (true)
+                        {
+                            Console.Write("Количество: ");
+                            try
+                            {
+                                Amount = Convert.ToInt32(Console.ReadLine());
+                                if (Amount <= 0)
+                                {
+                                    throw new Exception();
+                                }
+                                break;
+                            }
+                            catch (Exception)
+                            {
+                                Console.WriteLine();
+                                Console.WriteLine("Вы ввели неверное значение");
+                                Console.WriteLine();
+                            }
+                        }
                         Request.AddProduct(FoundProduct, Amount);
                         Console.Clear();
                     }

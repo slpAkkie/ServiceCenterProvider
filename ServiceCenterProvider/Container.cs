@@ -24,6 +24,11 @@ namespace ServiceCenterProvider
                 string Line;
                 while ((Line = _StreamReader.ReadLine()) != null)
                 {
+                    if (String.IsNullOrEmpty(Line))
+                    {
+                        continue;
+                    }
+
                     string[] ProductData = Line.Split(';');
                     this.ProductRepository.New(ProductData[0], ProductData[1]);
                 }

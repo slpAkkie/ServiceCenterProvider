@@ -15,7 +15,7 @@ namespace ServiceCenterProvider.Screens
         {
             this.Container = _Container;
         }
-        
+
         public void Run()
         {
             while (!this.IsClose)
@@ -28,14 +28,38 @@ namespace ServiceCenterProvider.Screens
                 }
 
                 Console.WriteLine("Создание / Просмотр накладной");
-                Console.Write("Номер накладной: №");
-                int ConsignmentNumber = Convert.ToInt32(Console.ReadLine()); // TODO: Ошибка преобразования / переполнения
+                int ConsignmentNumber;
+                while (true)
+                {
+                    Console.Write("Номер накладной: №");
+                    try
+                    {
+                        ConsignmentNumber = Convert.ToInt32(Console.ReadLine());
+                        if (ConsignmentNumber <= 0)
+                        {
+                            throw new Exception();
+                        }
+                        break;
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("Вы ввели неверное значение");
+                        Console.WriteLine();
+                    }
+                }
+
                 Console.Clear();
 
                 Entities.Consignment Consignment = this.Container.ConsignmentRepository.Find(ConsignmentNumber);
                 if (Consignment == null)
                 {
-                    this.CreateNew(ConsignmentNumber);
+                    
+                    Entities.Consignment _Consignment = this.CreateNew(ConsignmentNumber);
+                    if (_Consignment.Products.Count() == 0)
+                    {
+                        this.Container.ConsignmentRepository.Items.Remove(_Consignment);
+                    }
                 }
                 else
                 {
@@ -48,11 +72,13 @@ namespace ServiceCenterProvider.Screens
             Console.Clear();
         }
 
-        public void CreateNew(int ConsignmentNumber)
+        public Entities.Consignment CreateNew(int ConsignmentNumber)
         {
             Entities.Consignment Consignment = this.Container.ConsignmentRepository.New(ConsignmentNumber);
 
             this.AskForProducts(Consignment);
+
+            return Consignment;
         }
 
         public void AskForProducts(Entities.Consignment Consignment)
@@ -83,8 +109,26 @@ namespace ServiceCenterProvider.Screens
                     }
                     else
                     {
-                        Console.Write("Количество: ");
-                        int Amount = Convert.ToInt32(Console.ReadLine()); // TODO: Ошибка преобразования / переполнения
+                        int Amount;
+                        while (true)
+                        {
+                            Console.Write("Количество: ");
+                            try
+                            {
+                                Amount = Convert.ToInt32(Console.ReadLine());
+                                if (Amount <= 0)
+                                {
+                                    throw new Exception();
+                                }
+                                break;
+                            }
+                            catch (Exception)
+                            {
+                                Console.WriteLine();
+                                Console.WriteLine("Вы ввели неверное значение");
+                                Console.WriteLine();
+                            }
+                        }
                         Consignment.AddProduct(FoundProduct, Amount);
                         Console.Clear();
                     }
