@@ -8,12 +8,12 @@ namespace ServiceCenterProvider.Entities
 {
     class Consignment
     {
-        public int Number;
+        public int Id;
         public Dictionary<Product, int> Products;
 
         public Consignment(int Number)
         {
-            this.Number = Number;
+            this.Id = Number;
             this.Products = new Dictionary<Product, int>();
         }
 
@@ -32,14 +32,14 @@ namespace ServiceCenterProvider.Entities
 
         public void Print()
         {
-            Console.WriteLine($"Накладная №{this.Number}");
+            Console.WriteLine($"Накладная №{this.Id}");
         }
 
         public void PrintProducts()
         {
             foreach (KeyValuePair<Product, int> _Product in this.Products)
             {
-                Console.WriteLine($"Накладная №{this.Number}, {_Product.Key.Name} - {_Product.Value} шт");
+                Console.WriteLine($"{_Product.Key.Name} - {_Product.Value} шт");
             }
         }
     }

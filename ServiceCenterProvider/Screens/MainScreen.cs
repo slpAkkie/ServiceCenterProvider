@@ -22,7 +22,7 @@ namespace ServiceCenterProvider.Screens
             while (!this.IsClose)
             {
                 Console.WriteLine("Выберите действие");
-                Console.WriteLine("1. Создание / Редактирование зявки");
+                Console.WriteLine("1. Создание / Редактирование заявки");
                 Console.WriteLine("2. Оформление / Просмотр накладной");
                 Console.WriteLine();
                 Console.WriteLine("Пустая строка, чтобы завершить");
@@ -56,6 +56,55 @@ namespace ServiceCenterProvider.Screens
 
         public void Calculate()
         {
+            foreach (Entities.Request Request in this.Container.RequestRepository.Items)
+            {
+                foreach (KeyValuePair<Entities.Product, int> _Products in Request.Products)
+                {
+                    Console.Write($"Заявка №{Request.Id}. ");
+
+                    Console.Write($"{_Products.Key.Name}: заказано - {_Products.Value}");
+                    int Remain = _Products.Value;
+                    IEnumerable<Entities.Consignment> Consignemnts = from c in this.Container.ConsignmentRepository.Items
+                                                                     where (from p in c.Products where p.Key == _Products.Key select p).Count() >= 1
+                                                                     select c;
+
+                    List<Entities.Consignment> ConsignmentsList = Consignemnts.ToList();
+
+                    if (ConsignmentsList.Count() == 0)
+                    {
+                        Console.Write(", отгружено - нет");
+                    }
+
+                    foreach (Entities.Consignment Consignemnt in ConsignmentsList)
+                    {
+                        int Amount;
+                        if (Consignemnt.Products.TryGetValue(_Products.Key, out Amount)) {
+                            int Diff, OldRemain = Remain;
+
+                            if (Amount > Remain)
+                            {
+                                Consignemnt.Products[_Products.Key] = Amount - Remain;
+                                Remain = 0;
+                            } else
+                            {
+                                Remain -= Amount;
+                                Consignemnt.Products[_Products.Key] = 0;
+                            }
+
+                            Diff = OldRemain - Remain;
+
+                            Console.Write($", отгружено - {Diff} шт (накладная №{Consignemnt.Id})");
+                        }
+
+                        if (Remain <= 0)
+                        {
+                            break;
+                        }
+                    }
+
+                    Console.WriteLine();
+                }
+            }
             Console.ReadKey();
 
             this.IsClose = true;

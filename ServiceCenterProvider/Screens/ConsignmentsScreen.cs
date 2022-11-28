@@ -15,7 +15,7 @@ namespace ServiceCenterProvider.Screens
         {
             this.Container = _Container;
         }
-
+        
         public void Run()
         {
             while (!this.IsClose)

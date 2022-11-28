@@ -34,7 +34,7 @@ namespace ServiceCenterProvider.Repositories
         public Entities.Consignment Find(int Number)
         {
             IEnumerable<Entities.Consignment> result = from c in this.Items
-                                                   where c.Number == Number
+                                                   where c.Id == Number
                                                    select c;
 
             if (result.Count() == 0)

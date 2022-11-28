@@ -23,7 +23,7 @@ namespace ServiceCenterProvider.Repositories
         public Entities.Product Find(string ProductNameOrCode)
         {
             IEnumerable<Entities.Product> result = from p in this.Items
-                                                   where p.Name == ProductNameOrCode
+                                                   where p.Name == ProductNameOrCode || p.Code == ProductNameOrCode
                                                    select p;
 
             if (result.Count() == 0)

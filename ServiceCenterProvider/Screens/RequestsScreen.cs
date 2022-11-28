@@ -27,7 +27,7 @@ namespace ServiceCenterProvider.Screens
                     Console.WriteLine();
                 }
 
-                Console.WriteLine("Создание / Редактирование зявки");
+                Console.WriteLine("Создание / Редактирование заявки");
                 Console.Write("Номер заявки: №");
                 int RequestNumber = Convert.ToInt32(Console.ReadLine()); // TODO: Ошибка преобразования / переполнения
                 Console.Clear();
@@ -96,7 +96,6 @@ namespace ServiceCenterProvider.Screens
         private void Update(Entities.Request Request)
         {
             Request.Print();
-            Request.PrintProducts();
 
             Console.WriteLine();
 

@@ -34,7 +34,7 @@ namespace ServiceCenterProvider.Repositories
         public Entities.Request Find(int Number)
         {
             IEnumerable<Entities.Request> result = from r in this.Items
-                   where r.Number == Number
+                   where r.Id == Number
                    select r;
 
             if (result.Count() == 0)
