@@ -1,11 +1,15 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace ServiceCenterProvider.Screens
 {
     class MainScreen : IScreen
     {
+        private const string SERIALIZATION_TEMP = "serialize.dat.tmp";
+
         private Container Container;
 
         private bool IsClose = false;
@@ -22,6 +26,7 @@ namespace ServiceCenterProvider.Screens
                 Console.WriteLine("Выберите действие");
                 Console.WriteLine("1. Создание / Редактирование заявки");
                 Console.WriteLine("2. Оформление / Просмотр накладной");
+                Console.WriteLine("3. Просмотр результата");
                 Console.WriteLine();
                 Console.WriteLine("Пустая строка, чтобы завершить");
                 Console.WriteLine();
@@ -34,8 +39,8 @@ namespace ServiceCenterProvider.Screens
                 {
                     case "1": this.OpenNewRequestScreen(); break;
                     case "2": this.OpenNewConsignmentScreen(); break;
-                    case "": this.Calculate(); break;
-                    default: this.NoSuchEntry(); break;
+                    case "3": this.Calculate(); break;
+                    default: this.IsClose = true; break;
                 }
             }
 
@@ -54,6 +59,9 @@ namespace ServiceCenterProvider.Screens
 
         public void Calculate()
         {
+            Dictionary<int, Dictionary<string, int>> Initials;
+            this.SaveConsignmentsInitials(out Initials);
+
             foreach (Entities.Request Request in this.Container.RequestRepository.Items)
             {
                 foreach (KeyValuePair<Entities.Product, int> _Products in Request.Products)
@@ -63,7 +71,7 @@ namespace ServiceCenterProvider.Screens
                     Console.Write($"{_Products.Key.Name}: заказано - {_Products.Value}");
                     int Remain = _Products.Value;
                     IEnumerable<Entities.Consignment> Consignemnts = from c in this.Container.ConsignmentRepository.Items
-                                                                     where (from p in c.Products where p.Key == _Products.Key select p).Count() >= 1
+                                                                     where (from p in c.Products where p.Key.Code == _Products.Key.Code select p).Count() >= 1
                                                                      select c;
 
                     List<Entities.Consignment> ConsignmentsList = Consignemnts.ToList();
@@ -92,6 +100,9 @@ namespace ServiceCenterProvider.Screens
                             Diff = OldRemain - Remain;
 
                             Console.Write($", отгружено - {Diff} шт (накладная №{Consignemnt.Id})");
+                        } else
+                        {
+                            Console.Write(", отгружено - нет");
                         }
 
                         if (Remain <= 0)
@@ -104,14 +115,48 @@ namespace ServiceCenterProvider.Screens
                 }
             }
             Console.ReadKey();
+            Console.Clear();
 
-            this.IsClose = true;
+            this.RestoreConsignmentsInitials(Initials);
+
+            this.IsClose = false;
         }
 
-        private void NoSuchEntry()
+        private void SaveConsignmentsInitials(out Dictionary<int, Dictionary<string, int>> Initials)
         {
-            Console.WriteLine("Такого пункта в меню нет, пожалуйста посмотрите еще раз");
-            Console.WriteLine();
+            Initials = new Dictionary<int, Dictionary<string, int>>();
+            foreach (Entities.Consignment _Consignment in this.Container.ConsignmentRepository.Items)
+            {
+                Dictionary<string, int> _ConsignmentInitials;
+                if (!Initials.TryGetValue(_Consignment.Id, out _ConsignmentInitials))
+                {
+                    _ConsignmentInitials = new Dictionary<string, int>() { };
+                    Initials.Add(_Consignment.Id, _ConsignmentInitials);
+                }
+
+                foreach (KeyValuePair<Entities.Product, int> _ConsignmentProduct in _Consignment.Products)
+                {
+                    _ConsignmentInitials.Add(_ConsignmentProduct.Key.Code, _ConsignmentProduct.Value);
+                }
+            }
+        }
+
+        private void RestoreConsignmentsInitials(in Dictionary<int, Dictionary<string, int>> Initials)
+        {
+            Dictionary<Entities.Product, int> NewConsignmentProducts;
+            foreach (Entities.Consignment _Consignment in this.Container.ConsignmentRepository.Items)
+            {
+                Dictionary<string, int> _ConsignmentInitials;
+                if (Initials.TryGetValue(_Consignment.Id, out _ConsignmentInitials))
+                {
+                    NewConsignmentProducts = new Dictionary<Entities.Product, int>();
+                    foreach (KeyValuePair<Entities.Product, int> _Products in _Consignment.Products)
+                    {
+                        NewConsignmentProducts.Add(_Products.Key, Initials[_Consignment.Id][_Products.Key.Code]);
+                    }
+                    _Consignment.Products = NewConsignmentProducts;
+                }
+            }
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace ServiceCenterProvider.Entities
+﻿using System;
+
+namespace ServiceCenterProvider.Entities
 {
     class Product
     {
