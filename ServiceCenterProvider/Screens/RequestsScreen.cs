@@ -82,6 +82,9 @@ namespace ServiceCenterProvider.Screens
 
             do
             {
+                Console.WriteLine($"Заявка №{Request.Id}");
+                Console.WriteLine();
+
                 if (Request.Products.Count > 0)
                 {
                     Request.PrintProducts();

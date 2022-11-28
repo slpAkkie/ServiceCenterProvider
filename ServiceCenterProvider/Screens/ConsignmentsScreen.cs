@@ -84,6 +84,9 @@ namespace ServiceCenterProvider.Screens
 
             do
             {
+                Console.WriteLine($"Накладная №{Consignment.Id}");
+                Console.WriteLine();
+
                 if (Consignment.Products.Count > 0)
                 {
                     Consignment.PrintProducts();
