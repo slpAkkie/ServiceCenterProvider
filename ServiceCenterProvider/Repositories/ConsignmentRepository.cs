@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System;
 
 namespace ServiceCenterProvider.Repositories
 {
@@ -21,19 +20,11 @@ namespace ServiceCenterProvider.Repositories
             return Consignment;
         }
 
-        public void Print()
-        {
-            foreach (Entities.Consignment _Consignment in this.Items)
-            {
-                _Consignment.Print();
-            }
-        }
-
         public Entities.Consignment Find(int Number)
         {
             IEnumerable<Entities.Consignment> result = from c in this.Items
-                                                   where c.Id == Number
-                                                   select c;
+                                                       where c.Id == Number
+                                                       select c;
 
             if (result.Count() == 0)
             {
@@ -41,6 +32,14 @@ namespace ServiceCenterProvider.Repositories
             }
 
             return result.First();
+        }
+
+        public void Print()
+        {
+            foreach (Entities.Consignment _Consignment in this.Items)
+            {
+                _Consignment.Print();
+            }
         }
     }
 }

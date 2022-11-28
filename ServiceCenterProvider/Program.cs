@@ -2,6 +2,6 @@
 {
     class Program
     {
-        static void Main() => new Container().Start();
+        static void Main() => new Application().Start();
     }
 }

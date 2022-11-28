@@ -20,19 +20,11 @@ namespace ServiceCenterProvider.Repositories
             return Request;
         }
 
-        public void Print()
-        {
-            foreach (Entities.Request _Request in this.Items)
-            {
-                _Request.Print();
-            }
-        }
-
         public Entities.Request Find(int Number)
         {
             IEnumerable<Entities.Request> result = from r in this.Items
-                   where r.Id == Number
-                   select r;
+                                                   where r.Id == Number
+                                                   select r;
 
             if (result.Count() == 0)
             {
@@ -40,6 +32,14 @@ namespace ServiceCenterProvider.Repositories
             }
 
             return result.First();
+        }
+
+        public void Print()
+        {
+            foreach (Entities.Request _Request in this.Items)
+            {
+                _Request.Print();
+            }
         }
     }
 }

@@ -5,37 +5,37 @@ namespace ServiceCenterProvider.Screens
 {
     class RequestsScreen : IScreen
     {
-        private Container Container;
+        private Application App;
 
         private bool IsClose = false;
-        public RequestsScreen(Container _Container)
+        public RequestsScreen(Application _Container)
         {
-            this.Container = _Container;
+            this.App = _Container;
         }
 
         public void Run()
         {
             while (!this.IsClose)
             {
-                if (this.Container.RequestRepository.Items.Count > 0)
+                Output.GreenLine("Раздел заявок");
+
+                if (this.App.RequestRepository.Items.Count > 0)
                 {
-                    Console.WriteLine("Заявки: ");
-                    this.Container.RequestRepository.Print();
+                    Console.WriteLine();
+                    Output.BlueLine("Заявки в системе");
+                    this.App.RequestRepository.Print();
                     Console.WriteLine();
                 }
 
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Создание / Редактирование заявки");
-                Console.ForegroundColor = ConsoleColor.Gray;
+                Console.WriteLine("Для создания заявки введите новый номер, или существующий для редактирования");
                 Console.WriteLine();
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine("P.S. Для выхода введите 0");
-                Console.ForegroundColor = ConsoleColor.Gray;
+                Output.DarkLine("Введите 0, чтобы вернуться назад");
+                Console.WriteLine();
 
                 int RequestNumber;
                 while (true)
                 {
-                    Console.Write("Номер заявки: №");
+                    Console.Write(">>> ");
                     try
                     {
                         RequestNumber = Convert.ToInt32(Console.ReadLine());
@@ -54,28 +54,25 @@ namespace ServiceCenterProvider.Screens
                     catch (Exception)
                     {
                         Console.WriteLine();
-                        Console.ForegroundColor = ConsoleColor.DarkRed;
-                        Console.WriteLine("Вы ввели неверное значение");
-                        Console.ForegroundColor = ConsoleColor.Gray;
+                        Output.RedLine("Вы ввели неверное значение");
                         Console.WriteLine();
                     }
                 }
                 Console.Clear();
 
-                Entities.Request Request = this.Container.RequestRepository.Find(RequestNumber);
+                Entities.Request Request = this.App.RequestRepository.Find(RequestNumber);
                 if (Request == null)
                 {
                     Entities.Request _Request = this.CreateNew(RequestNumber);
                     if (_Request.Products.Count() == 0)
                     {
-                        this.Container.RequestRepository.Items.Remove(_Request);
+                        this.App.RequestRepository.Items.Remove(_Request);
                     }
-                } else
+                }
+                else
                 {
                     this.Update(Request);
                 }
-
-                this.IsClose = true;
             }
 
             Console.Clear();
@@ -83,7 +80,7 @@ namespace ServiceCenterProvider.Screens
 
         private Entities.Request CreateNew(int RequestNumber)
         {
-            Entities.Request Request = this.Container.RequestRepository.New(RequestNumber);
+            Entities.Request Request = this.App.RequestRepository.New(RequestNumber);
 
             this.AskForProducts(Request);
 
@@ -96,40 +93,48 @@ namespace ServiceCenterProvider.Screens
 
             do
             {
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.WriteLine($"Заявка №{Request.Id}");
-                Console.ForegroundColor = ConsoleColor.Gray;
-                Console.WriteLine();
+                Output.BlueLine($"Заявка №{Request.Id}");
 
                 if (Request.Products.Count > 0)
                 {
                     Request.PrintProducts();
                     Console.WriteLine();
                 }
+                else
+                {
+                    Console.WriteLine();
+                }
 
-                Console.ForegroundColor = ConsoleColor.DarkGreen;
-                Console.WriteLine("Список доступных к заказу деталей");
-                Console.ForegroundColor = ConsoleColor.Gray;
-                this.Container.ProductRepository.Print();
+                Output.GreenLine("Список доступных к заказу деталей");
+                this.App.ProductRepository.Print();
                 Console.WriteLine();
-                Console.Write("Наименование товара (Пустая строка, чтобы завершить): ");
+                Console.WriteLine("Для добавления товара введите наименование или код");
+                Console.WriteLine();
+                Output.DarkLine("Пустая строка, чтобы завершить");
+                Console.WriteLine();
+                Console.Write(">>> ");
                 ChosenProduct = Console.ReadLine();
                 if (!String.IsNullOrEmpty(ChosenProduct))
                 {
-                    Entities.Product FoundProduct = this.Container.ProductRepository.Find(ChosenProduct);
+                    Console.Clear();
+
+                    Entities.Product FoundProduct = this.App.ProductRepository.Find(ChosenProduct);
                     if (FoundProduct == null)
                     {
-                        Console.Clear();
-                        Console.WriteLine("Такого товара в списке нет пожалуйста, посмотрите еще раз");
+                        Output.RedLine("Такого товара в списке нет пожалуйста, посмотрите еще раз");
                         Console.WriteLine();
                     }
                     else
                     {
-
                         int Amount;
+
                         while (true)
                         {
-                            Console.Write("Количество: ");
+                            Output.BlueLine($"Выбраный товар: {FoundProduct.Name}. Код товара: {FoundProduct.Code}");
+                            Console.WriteLine();
+                            Console.WriteLine("Введите количество выбранного товара");
+                            Console.WriteLine();
+                            Console.Write(">>> ");
                             try
                             {
                                 Amount = Convert.ToInt32(Console.ReadLine());
@@ -141,10 +146,8 @@ namespace ServiceCenterProvider.Screens
                             }
                             catch (Exception)
                             {
-                                Console.WriteLine();
-                                Console.ForegroundColor = ConsoleColor.DarkRed;
-                                Console.WriteLine("Вы ввели неверное значение");
-                                Console.ForegroundColor = ConsoleColor.Gray;
+                                Console.Clear();
+                                Output.RedLine("Вы ввели неверное значение");
                                 Console.WriteLine();
                             }
                         }
@@ -160,7 +163,6 @@ namespace ServiceCenterProvider.Screens
         private void Update(Entities.Request Request)
         {
             Request.Print();
-
             Console.WriteLine();
 
             this.AskForProducts(Request);

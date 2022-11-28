@@ -20,7 +20,8 @@ namespace ServiceCenterProvider.Entities
             if (this.Products.TryGetValue(_Product, out _ProductAmount))
             {
                 this.Products[_Product] = _ProductAmount + Amount;
-            } else
+            }
+            else
             {
                 this.Products.Add(_Product, Amount);
             }

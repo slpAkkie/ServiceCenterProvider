@@ -3,8 +3,7 @@
     interface IScreen
     {
         /// <summary>
-        /// Запуск экрана.
-        /// Обрабатывает весь жизненный цикл экрана.
+        /// Starts the Screen scenario.
         /// </summary>
         void Run();
     }

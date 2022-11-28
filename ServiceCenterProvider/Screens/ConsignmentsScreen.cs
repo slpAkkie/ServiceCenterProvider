@@ -5,35 +5,37 @@ namespace ServiceCenterProvider.Screens
 {
     class ConsignmentsScreen : IScreen
     {
-        private Container Container;
+        private Application App;
 
         private bool IsClose = false;
-        public ConsignmentsScreen(Container _Container)
+        public ConsignmentsScreen(Application _Container)
         {
-            this.Container = _Container;
+            this.App = _Container;
         }
 
         public void Run()
         {
             while (!this.IsClose)
             {
-                if (this.Container.ConsignmentRepository.Items.Count > 0)
+                Output.GreenLine("Раздел накладных");
+
+                if (this.App.ConsignmentRepository.Items.Count > 0)
                 {
-                    Console.WriteLine("Накладные: ");
-                    this.Container.ConsignmentRepository.Print();
+                    Console.WriteLine();
+                    Output.BlueLine("Накладные в системе");
+                    this.App.ConsignmentRepository.Print();
                     Console.WriteLine();
                 }
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Создание / Просмотр накладной");
-                Console.ForegroundColor = ConsoleColor.Gray;
+
+                Console.WriteLine("Для создания накладной введите новый номер, или существующий для редактирования");
                 Console.WriteLine();
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine("P.S. Для выхода введите 0");
-                Console.ForegroundColor = ConsoleColor.Gray;
+                Output.DarkLine("Введите 0, чтобы вернуться назад");
+                Console.WriteLine();
+
                 int ConsignmentNumber;
                 while (true)
                 {
-                    Console.Write("Номер накладной: №");
+                    Console.Write(">>> ");
                     try
                     {
                         ConsignmentNumber = Convert.ToInt32(Console.ReadLine());
@@ -52,31 +54,27 @@ namespace ServiceCenterProvider.Screens
                     catch (Exception)
                     {
                         Console.WriteLine();
-                        Console.ForegroundColor = ConsoleColor.DarkRed;
-                        Console.WriteLine("Вы ввели неверное значение");
-                        Console.ForegroundColor = ConsoleColor.Gray;
+                        Output.RedLine("Вы ввели неверное значение");
                         Console.WriteLine();
                     }
                 }
 
                 Console.Clear();
 
-                Entities.Consignment Consignment = this.Container.ConsignmentRepository.Find(ConsignmentNumber);
+                Entities.Consignment Consignment = this.App.ConsignmentRepository.Find(ConsignmentNumber);
                 if (Consignment == null)
                 {
-                    
+
                     Entities.Consignment _Consignment = this.CreateNew(ConsignmentNumber);
                     if (_Consignment.Products.Count() == 0)
                     {
-                        this.Container.ConsignmentRepository.Items.Remove(_Consignment);
+                        this.App.ConsignmentRepository.Items.Remove(_Consignment);
                     }
                 }
                 else
                 {
                     this.View(Consignment);
                 }
-
-                this.IsClose = true;
             }
 
             Console.Clear();
@@ -84,7 +82,7 @@ namespace ServiceCenterProvider.Screens
 
         public Entities.Consignment CreateNew(int ConsignmentNumber)
         {
-            Entities.Consignment Consignment = this.Container.ConsignmentRepository.New(ConsignmentNumber);
+            Entities.Consignment Consignment = this.App.ConsignmentRepository.New(ConsignmentNumber);
 
             this.AskForProducts(Consignment);
 
@@ -97,39 +95,48 @@ namespace ServiceCenterProvider.Screens
 
             do
             {
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.WriteLine($"Накладная №{Consignment.Id}");
-                Console.ForegroundColor = ConsoleColor.Gray;
-                Console.WriteLine();
+                Output.BlueLine($"Накладная №{Consignment.Id}");
 
                 if (Consignment.Products.Count > 0)
                 {
                     Consignment.PrintProducts();
                     Console.WriteLine();
                 }
+                else
+                {
+                    Console.WriteLine();
+                }
 
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Список товаров");
-                Console.ForegroundColor = ConsoleColor.Gray;
-                this.Container.ProductRepository.Print();
+                Output.GreenLine("Список товаров");
+                this.App.ProductRepository.Print();
                 Console.WriteLine();
-                Console.Write("Наименование товара (Пустая строка, чтобы завершить): ");
+                Console.WriteLine("Для добавления товара введите наименование или код");
+                Console.WriteLine();
+                Output.DarkLine("Пустая строка, чтобы завершить");
+                Console.WriteLine();
+                Console.Write(">>> ");
                 ChosenProduct = Console.ReadLine();
                 if (!String.IsNullOrEmpty(ChosenProduct))
                 {
-                    Entities.Product FoundProduct = this.Container.ProductRepository.Find(ChosenProduct);
+                    Console.Clear();
+
+                    Entities.Product FoundProduct = this.App.ProductRepository.Find(ChosenProduct);
                     if (FoundProduct == null)
                     {
-                        Console.Clear();
-                        Console.WriteLine("Такого товара в списке нет пожалуйста, посмотрите еще раз");
+                        Output.RedLine("Такого товара в списке нет пожалуйста, посмотрите еще раз");
                         Console.WriteLine();
                     }
                     else
                     {
                         int Amount;
+
                         while (true)
                         {
-                            Console.Write("Количество: ");
+                            Output.BlueLine($"Выбраный товар: {FoundProduct.Name}. Код товара: {FoundProduct.Code}");
+                            Console.WriteLine();
+                            Console.WriteLine("Введите количество выбранного товара");
+                            Console.WriteLine();
+                            Console.Write(">>> ");
                             try
                             {
                                 Amount = Convert.ToInt32(Console.ReadLine());
@@ -141,10 +148,8 @@ namespace ServiceCenterProvider.Screens
                             }
                             catch (Exception)
                             {
-                                Console.WriteLine();
-                                Console.ForegroundColor = ConsoleColor.DarkRed;
-                                Console.WriteLine("Вы ввели неверное значение");
-                                Console.ForegroundColor = ConsoleColor.Gray;
+                                Console.Clear();
+                                Output.RedLine("Вы ввели неверное значение");
                                 Console.WriteLine();
                             }
                         }

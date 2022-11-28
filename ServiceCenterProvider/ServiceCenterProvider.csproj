@@ -43,10 +43,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Container.cs" />
+    <Compile Include="Application.cs" />
     <Compile Include="Entities\Consignment.cs" />
     <Compile Include="Entities\Product.cs" />
     <Compile Include="Entities\Request.cs" />
+    <Compile Include="Output.cs" />
     <Compile Include="Repositories\ConsignmentRepository.cs" />
     <Compile Include="Repositories\RequestRepository.cs" />
     <Compile Include="Repositories\ProductRepository.cs" />
