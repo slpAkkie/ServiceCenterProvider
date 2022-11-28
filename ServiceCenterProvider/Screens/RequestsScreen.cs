@@ -24,7 +24,13 @@ namespace ServiceCenterProvider.Screens
                     Console.WriteLine();
                 }
 
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Создание / Редактирование заявки");
+                Console.ForegroundColor = ConsoleColor.Gray;
+                Console.WriteLine();
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.WriteLine("P.S. Для выхода введите 0");
+                Console.ForegroundColor = ConsoleColor.Gray;
 
                 int RequestNumber;
                 while (true)
@@ -33,6 +39,12 @@ namespace ServiceCenterProvider.Screens
                     try
                     {
                         RequestNumber = Convert.ToInt32(Console.ReadLine());
+                        if (RequestNumber == 0)
+                        {
+                            Console.Clear();
+                            return;
+                        }
+
                         if (RequestNumber <= 0)
                         {
                             throw new Exception();
@@ -42,7 +54,9 @@ namespace ServiceCenterProvider.Screens
                     catch (Exception)
                     {
                         Console.WriteLine();
+                        Console.ForegroundColor = ConsoleColor.DarkRed;
                         Console.WriteLine("Вы ввели неверное значение");
+                        Console.ForegroundColor = ConsoleColor.Gray;
                         Console.WriteLine();
                     }
                 }
@@ -82,7 +96,9 @@ namespace ServiceCenterProvider.Screens
 
             do
             {
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
                 Console.WriteLine($"Заявка №{Request.Id}");
+                Console.ForegroundColor = ConsoleColor.Gray;
                 Console.WriteLine();
 
                 if (Request.Products.Count > 0)
@@ -91,7 +107,9 @@ namespace ServiceCenterProvider.Screens
                     Console.WriteLine();
                 }
 
+                Console.ForegroundColor = ConsoleColor.DarkGreen;
                 Console.WriteLine("Список доступных к заказу деталей");
+                Console.ForegroundColor = ConsoleColor.Gray;
                 this.Container.ProductRepository.Print();
                 Console.WriteLine();
                 Console.Write("Наименование товара (Пустая строка, чтобы завершить): ");
@@ -124,7 +142,9 @@ namespace ServiceCenterProvider.Screens
                             catch (Exception)
                             {
                                 Console.WriteLine();
+                                Console.ForegroundColor = ConsoleColor.DarkRed;
                                 Console.WriteLine("Вы ввели неверное значение");
+                                Console.ForegroundColor = ConsoleColor.Gray;
                                 Console.WriteLine();
                             }
                         }

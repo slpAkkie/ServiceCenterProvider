@@ -23,12 +23,18 @@ namespace ServiceCenterProvider.Screens
         {
             while (!this.IsClose)
             {
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Выберите действие");
+                Console.ForegroundColor = ConsoleColor.Gray;
                 Console.WriteLine("1. Создание / Редактирование заявки");
                 Console.WriteLine("2. Оформление / Просмотр накладной");
                 Console.WriteLine("3. Просмотр результата");
+                Console.WriteLine("4. Очистить заявки");
+                Console.WriteLine("5. Очистить накладные");
                 Console.WriteLine();
+                Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.WriteLine("Пустая строка, чтобы завершить");
+                Console.ForegroundColor = ConsoleColor.Gray;
                 Console.WriteLine();
 
                 Console.Write(">>> ");
@@ -40,6 +46,8 @@ namespace ServiceCenterProvider.Screens
                     case "1": this.OpenNewRequestScreen(); break;
                     case "2": this.OpenNewConsignmentScreen(); break;
                     case "3": this.Calculate(); break;
+                    case "4": this.Container.RequestRepository.Items.Clear(); break;
+                    case "5": this.Container.ConsignmentRepository.Items.Clear(); break;
                     default: this.IsClose = true; break;
                 }
             }
@@ -66,6 +74,7 @@ namespace ServiceCenterProvider.Screens
             {
                 foreach (KeyValuePair<Entities.Product, int> _Products in Request.Products)
                 {
+                    bool IsUnloaded = false;
                     Console.Write($"Заявка №{Request.Id}. ");
 
                     Console.Write($"{_Products.Key.Name}: заказано - {_Products.Value}");
@@ -76,22 +85,26 @@ namespace ServiceCenterProvider.Screens
 
                     List<Entities.Consignment> ConsignmentsList = Consignemnts.ToList();
 
-                    if (ConsignmentsList.Count() == 0)
-                    {
-                        Console.Write(", отгружено - нет");
-                    }
-
                     foreach (Entities.Consignment Consignemnt in ConsignmentsList)
                     {
                         int Amount;
-                        if (Consignemnt.Products.TryGetValue(_Products.Key, out Amount)) {
+                        if (Consignemnt.Products.TryGetValue(_Products.Key, out Amount))
+                        {
+                            if (Amount == 0)
+                            {
+                                continue;
+                            }
+
+                            IsUnloaded = true;
+
                             int Diff, OldRemain = Remain;
 
                             if (Amount > Remain)
                             {
                                 Consignemnt.Products[_Products.Key] = Amount - Remain;
                                 Remain = 0;
-                            } else
+                            }
+                            else
                             {
                                 Remain -= Amount;
                                 Consignemnt.Products[_Products.Key] = 0;
@@ -100,15 +113,17 @@ namespace ServiceCenterProvider.Screens
                             Diff = OldRemain - Remain;
 
                             Console.Write($", отгружено - {Diff} шт (накладная №{Consignemnt.Id})");
-                        } else
-                        {
-                            Console.Write(", отгружено - нет");
                         }
 
                         if (Remain <= 0)
                         {
                             break;
                         }
+                    }
+
+                    if (!IsUnloaded)
+                    {
+                        Console.Write(", отгружено - нет");
                     }
 
                     Console.WriteLine();
